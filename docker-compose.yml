@@ -1,0 +1,20 @@
+version: '3'
+services:
+  go:
+    build: backend
+    restart: always
+    ports:
+      - '8181:8181'
+    networks:
+      - some_network
+  react:
+    build: frontend
+    restart: always
+    tty: true
+    ports: 
+      - "3000:3000"
+    networks:
+      - some_network
+
+networks:
+  some_network:

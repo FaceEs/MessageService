@@ -1,0 +1,6 @@
+@MessageService_HostAddress = http://localhost:5263
+
+POST {{MessageService_HostAddress}}/sendmessage/
+Accept: application/json
+
+###
