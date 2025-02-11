@@ -1,20 +1,53 @@
 version: '3'
 services:
-  go:
-    build: backend
+  server:
+    build: MessageService
     restart: always
     ports:
-      - '8181:8181'
+      - '8080:8080'
+      - '8081:8181'
     networks:
       - some_network
-  react:
-    build: frontend
-    restart: always
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwerty123456
+      POSTGRES_DB: messageservicedb
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5430:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      postgres -c max_connections=1000
+               -c shared_buffers=256MB
+               -c effective_cache_size=768MB
+               -c maintenance_work_mem=64MB
+               -c checkpoint_completion_target=0.7
+               -c wal_buffers=16MB
+               -c default_statistics_target=100
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres_user -d postgres_db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
     tty: true
-    ports: 
-      - "3000:3000"
+    stdin_open: true
     networks:
       - some_network
-
 networks:
   some_network:
+volumes:
+  pgdata:
+    driver: local  
